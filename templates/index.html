@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% if test_mode %}Test Trial{% else %}AV Synchrony Study{% endif %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body data-test-mode="{{ 'true' if test_mode else 'false' }}">
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Perceptual Synchrony Study home">
+        <span class="brand-mark" aria-hidden="true">AV</span>
+        <span>
+          <span class="brand-title">Perceptual Synchrony Study</span>
+          <span class="brand-subtitle">Audiovisual perception research</span>
+        </span>
+      </a>
+
+      <div class="topbar-right">
+        {% if test_mode %}
+        <div class="test-mode-label"><span></span> Test mode</div>
+        {% endif %}
+        <div id="progressWrap" class="progress-wrap hidden" aria-live="polite">
+          <div id="progressText" class="progress-text">Trial 1 of 1</div>
+          <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="study-card">
+      <div id="screen-loading" class="screen active centered-screen">
+        <div class="loader" aria-hidden="true"></div>
+        <p class="loading-copy">Preparing the study…</p>
+      </div>
+
+      <div id="screen-error" class="screen centered-screen">
+        <div class="eyebrow danger">Setup problem</div>
+        <h1>We couldn’t prepare the study</h1>
+        <p id="errorMessage" class="lead"></p>
+        <div class="callout">Check the video files in <code>static/stimuli/</code>, then refresh this page.</div>
+      </div>
+
+      <div id="screen-welcome" class="screen content-screen">
+        <div class="intro-layout">
+          <div class="intro-copy">
+            <div class="eyebrow">Before you begin</div>
+            <h1>Listen closely.<br />Watch carefully.</h1>
+            <p class="lead">You’ll watch short clips and tell us whether the sound and picture feel synchronized.</p>
+          </div>
+
+          <div class="intro-panel">
+            <ol class="study-steps">
+              <li><span>1</span><div><strong>Watch each clip once</strong><p>Focus on when visible events and sounds occur.</p></div></li>
+              <li><span>2</span><div><strong>Judge synchronization</strong><p>Answer whether the sound and picture matched.</p></div></li>
+              <li><span>3</span><div><strong>Rate naturalness</strong><p>Choose a rating from 1 to 7.</p></div></li>
+            </ol>
+
+            <div class="form-row">
+              <label for="participantId">Participant ID</label>
+              <input id="participantId" type="text" placeholder="For example, P012" maxlength="40" autocomplete="off" />
+              <span class="hint">Enter the anonymous ID given to you.</span>
+            </div>
+
+            <div id="resumeBanner" class="resume-banner hidden">
+              <div class="resume-content">
+                <span class="resume-icon" aria-hidden="true">↺</span>
+                <div><strong id="resumeTitle">Previous progress found</strong><p id="resumeDesc">Resuming trial</p></div>
+              </div>
+              <button id="discardSessionBtn" class="btn-text-danger" type="button">Start fresh</button>
+            </div>
+
+            <label class="consent-row">
+              <input id="consentCheck" type="checkbox" />
+              <span>I have read the study instructions and agree to continue.</span>
+            </label>
+            <div class="actions"><button id="startBtn" class="btn primary" disabled>Continue</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-instructions" class="screen content-screen narrow-screen">
+        <div class="eyebrow">Instructions</div>
+        <h1>Two things to consider</h1>
+        <p class="lead">There are no right or wrong answers. Respond based on your first impression.</p>
+
+        <div class="instruction-stack">
+          <div class="instruction-row"><div class="instruction-index">01</div><div><h3>Synchronization</h3><p>Did the sound happen at the same time as the corresponding visible event?</p></div></div>
+          <div class="instruction-row"><div class="instruction-index">02</div><div><h3>Naturalness</h3><p>How natural did the combined sound and video feel overall?</p></div></div>
+        </div>
+
+        <div class="shortcut-row" aria-label="Keyboard shortcuts">
+          <span><kbd>Space</kbd> Play</span>
+          <span><kbd>Y</kbd> / <kbd>N</kbd> Synchrony</span>
+          <span><kbd>1</kbd>–<kbd>7</kbd> Naturalness</span>
+        </div>
+        <div class="callout">
+          Please use headphones if available. Once a video starts, it cannot be paused, stopped, or replayed. Avoid refreshing or switching windows during a clip.
+        </div>
+        <div class="actions split">
+          <button class="btn ghost" data-back="welcome">Back</button>
+          <button id="instructionsNextBtn" class="btn primary">Continue to practice</button>
+        </div>
+      </div>
+
+      <div id="screen-practice-intro" class="screen centered-screen compact-message">
+        <div class="eyebrow">Practice</div>
+        <h1>Try one practice clip</h1>
+        <p class="lead">Your practice response is not included in the main study.</p>
+        <div class="actions"><button id="practiceStartBtn" class="btn primary">Start practice</button></div>
+      </div>
+
+      <div id="screen-trial" class="screen trial-screen">
+        <div class="trial-meta">
+          <span id="trialPhasePill" class="pill">Experimental trial</span>
+          <span id="trialInstruction">Watch the entire clip before responding.</span>
+        </div>
+
+        <div class="trial-workspace">
+          <div id="videoFrame" class="video-frame">
+            <video id="stimulusVideo" playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video>
+            <div id="videoOverlay" class="video-overlay">
+              <button id="playBtn" class="play-button" aria-label="Play video"><span aria-hidden="true">▶</span></button>
+              <p>Play clip <span class="overlay-shortcut">Space</span></p>
+            </div>
+            <div id="videoEndedBadge" class="ended-badge hidden">Clip complete</div>
+          </div>
+
+          <div class="trial-questions-container" id="trialQuestionsContainer" aria-live="polite">
+            <div id="syncQuestion" class="question-panel hidden">
+              <div class="question-step">Question 1 of 2</div>
+              <h2>Did the sound and visible events appear synchronized?</h2>
+              <div class="choice-grid two">
+                <button class="choice-btn sync-choice" data-value="yes" id="btnSyncYes"><span>Yes</span><kbd>Y</kbd></button>
+                <button class="choice-btn sync-choice" data-value="no" id="btnSyncNo"><span>No</span><kbd>N</kbd></button>
+              </div>
+            </div>
+
+            <div id="naturalnessQuestion" class="question-panel hidden">
+              <div class="question-step">Question 2 of 2</div>
+              <h2>How natural did the audio and video feel together?</h2>
+              <div class="scale-labels"><span>Very unnatural</span><span>Very natural</span></div>
+              <div class="choice-grid seven">
+                {% for rating in range(1, 8) %}
+                <button class="choice-btn natural-choice" data-value="{{ rating }}" aria-label="Naturalness {{ rating }} out of 7">{{ rating }}</button>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="screen-practice-complete" class="screen centered-screen compact-message">
+        <div class="completion-mark">✓</div>
+        <div class="eyebrow success">Practice complete</div>
+        <h1>You’re ready</h1>
+        <p class="lead">The main study uses the same two questions across randomized clips.</p>
+        <div class="actions"><button id="mainStartBtn" class="btn primary">Start experiment</button></div>
+      </div>
+
+      <div id="screen-break" class="screen centered-screen compact-message">
+        <div class="eyebrow">Short break</div>
+        <h1>Take a moment</h1>
+        <p class="lead">Rest your eyes briefly and continue when you’re ready.</p>
+        <div class="actions"><button id="breakContinueBtn" class="btn primary">Continue study</button></div>
+      </div>
+
+      <div id="screen-complete" class="screen centered-screen compact-message">
+        <div class="completion-mark">✓</div>
+        <div class="eyebrow success">{% if test_mode %}Test complete{% else %}Study complete{% endif %}</div>
+        <h1>{% if test_mode %}Everything worked{% else %}Thank you{% endif %}</h1>
+        <p class="lead">{% if test_mode %}This response was not saved. You can run another randomized test trial or return to the study.{% else %}Your responses have been recorded. Please notify the researcher that you have finished.{% endif %}</p>
+
+        {% if test_mode %}
+        <div class="actions test-actions">
+          <button id="testAgainBtn" class="btn primary">Test another clip</button>
+          <a href="/" class="btn ghost">Open full study</a>
+        </div>
+        {% else %}
+        <div class="completion-stats">
+          <div><strong id="completedTrials">0</strong><span>trials completed</span></div>
+          <div><strong id="sessionCode">—</strong><span>session code</span></div>
+        </div>
+        <div class="debrief-box" id="debriefSection">
+          <label for="debriefFeedback">Optional feedback</label>
+          <p>Did anything about the clips look or sound unusual?</p>
+          <textarea id="debriefFeedback" rows="2" placeholder="Share any observations"></textarea>
+          <div class="debrief-actions">
+            <button id="submitDebriefBtn" class="btn secondary">Submit feedback</button>
+            <span id="debriefStatus" class="debrief-status">Feedback saved</span>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>CS 6326 · HCI Project</span>
+      <span id="statusDot" class="status"><i></i> Ready</span>
+    </footer>
+  </main>
+  <script src="{{ url_for('static', filename='js/experiment.js') }}"></script>
+</body>
+</html>

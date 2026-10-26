@@ -1,0 +1,30 @@
+name: Keep Render App Alive
+
+on:
+  schedule:
+    # Run every 10 minutes (Render spins down after 15 minutes of inactivity)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab anytime
+
+jobs:
+  ping:
+    name: Ping Keepalive Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Keepalive Ping to Render Web Service
+        env:
+          RENDER_APP_URL: ${{ secrets.RENDER_APP_URL || vars.RENDER_APP_URL }}
+        run: |
+          if [ -z "$RENDER_APP_URL" ]; then
+            echo "::warning ::RENDER_APP_URL is not set yet. Please add RENDER_APP_URL in GitHub Repo Settings -> Secrets and variables -> Actions."
+            echo "Example URL: https://hci-av-synchrony-study.onrender.com"
+            exit 0
+          fi
+
+          # Strip trailing slash if present
+          CLEAN_URL="${RENDER_APP_URL%/}"
+          TARGET_URL="${CLEAN_URL}/api/keepalive"
+
+          echo "Pinging: ${TARGET_URL}"
+          RESPONSE=$(curl -fsSL --retry 2 --max-time 30 "${TARGET_URL}")
+          echo "Response from server: ${RESPONSE}"

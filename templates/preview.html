@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Audio Normalization Comparison · HCI Study</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    .preview-container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .preview-header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .preview-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+    .preview-header p {
+      color: #94a3b8;
+      font-size: 1.05rem;
+    }
+    .clip-comparison-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .card-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.75rem;
+    }
+    .card-title h2 {
+      font-size: 1.3rem;
+      color: #f8fafc;
+      margin: 0;
+    }
+    .badge-category {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      padding: 0.3rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .video-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .video-panel {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .video-panel h3 {
+      font-size: 1rem;
+      color: #cbd5e1;
+      margin: 0 0 0.75rem 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .video-panel video {
+      width: 100%;
+      border-radius: 8px;
+      background: #000;
+      display: block;
+    }
+    .metric-row {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+    .metric-row span strong {
+      color: #e2e8f0;
+    }
+    .nav-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .nav-actions a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .nav-actions a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+
+  <main class="preview-container">
+    <div class="nav-actions">
+      <a href="/">← Return to Study Interface</a>
+      <span style="color: #64748b; font-size: 0.9rem;">Reviewing Base 0 ms Stimuli</span>
+    </div>
+
+    <header class="preview-header">
+      <h1>Audio Normalization Comparison</h1>
+      <p>Listen and compare the Original clips versus the EBU R128 (-18 LUFS) Normalized audio.</p>
+    </header>
+
+    <!-- Clip 1: green_sweater -->
+    <div class="clip-comparison-card">
+      <div class="card-title">
+        <h2>Female Speaker (green_sweater) <span style="font-size: 0.9rem; font-weight: normal; color: #a855f7; margin-left: 0.5rem;">[Gemini]</span></h2>
+        <span class="badge-category">Speech</span>
+      </div>
+      <div class="video-grid">
+        <div class="video-panel">
+          <h3><span>Original Audio</span><span style="color: #f87171;">Quiet (-40.3 dB)</span></h3>
+          <video src="/static/stimuli_old_unnormalized/green_sweater__speech__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-40.3 dB</strong></span>
+            <span>Peak: <strong>-17.9 dB</strong></span>
+          </div>
+        </div>
+        <div class="video-panel">
+          <h3><span>Normalized Audio (EBU R128)</span><span style="color: #34d399;">Balanced (-26.5 dB)</span></h3>
+          <video src="/static/stimuli/green_sweater__speech__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-26.5 dB</strong></span>
+            <span>Peak: <strong>-5.3 dB</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clip 2: blue_notebook -->
+    <div class="clip-comparison-card">
+      <div class="card-title">
+        <h2>Male Speaker (blue_notebook) <span style="font-size: 0.9rem; font-weight: normal; color: #38bdf8; margin-left: 0.5rem;">[LTX-2.5]</span></h2>
+        <span class="badge-category">Speech</span>
+      </div>
+      <div class="video-grid">
+        <div class="video-panel">
+          <h3><span>Original Audio</span><span style="color: #fbbf24;">Loud (-20.7 dB)</span></h3>
+          <video src="/static/stimuli_old_unnormalized/blue_notebook__speech__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-20.7 dB</strong></span>
+            <span>Peak: <strong>-0.4 dB</strong></span>
+          </div>
+        </div>
+        <div class="video-panel">
+          <h3><span>Normalized Audio (EBU R128)</span><span style="color: #34d399;">Balanced (-20.6 dB)</span></h3>
+          <video src="/static/stimuli/blue_notebook__speech__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-20.6 dB</strong></span>
+            <span>Peak: <strong>-1.3 dB</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clip 3: mug_clink -->
+    <div class="clip-comparison-card">
+      <div class="card-title">
+        <h2>Spoon on Mug (mug_clink) <span style="font-size: 0.9rem; font-weight: normal; color: #38bdf8; margin-left: 0.5rem;">[LTX-2.5]</span></h2>
+        <span class="badge-category">Discrete Impact</span>
+      </div>
+      <div class="video-grid">
+        <div class="video-panel">
+          <h3><span>Original Audio</span><span style="color: #f87171;">Faint (-34.2 dB)</span></h3>
+          <video src="/static/stimuli_old_unnormalized/mug_clink__discrete__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-34.2 dB</strong></span>
+            <span>Peak: <strong>-7.7 dB</strong></span>
+          </div>
+        </div>
+        <div class="video-panel">
+          <h3><span>Normalized Audio (EBU R128)</span><span style="color: #34d399;">Balanced (-29.5 dB)</span></h3>
+          <video src="/static/stimuli/mug_clink__discrete__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-29.5 dB</strong></span>
+            <span>Peak: <strong>-3.1 dB</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clip 4: book_drop -->
+    <div class="clip-comparison-card">
+      <div class="card-title">
+        <h2>Book Placed on Desk (book_drop) <span style="font-size: 0.9rem; font-weight: normal; color: #a855f7; margin-left: 0.5rem;">[Gemini]</span></h2>
+        <span class="badge-category">Discrete Impact</span>
+      </div>
+      <div class="video-grid">
+        <div class="video-panel">
+          <h3><span>Original Audio</span><span style="color: #f87171;">Faint (-35.7 dB)</span></h3>
+          <video src="/static/stimuli_old_unnormalized/book_drop__discrete__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-35.7 dB</strong></span>
+            <span>Peak: <strong>-3.7 dB</strong></span>
+          </div>
+        </div>
+        <div class="video-panel">
+          <h3><span>Normalized Audio (EBU R128)</span><span style="color: #34d399;">Balanced (-22.7 dB)</span></h3>
+          <video src="/static/stimuli/book_drop__discrete__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-22.7 dB</strong></span>
+            <span>Peak: <strong>-1.2 dB</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clip 5: drum_taps -->
+    <div class="clip-comparison-card">
+      <div class="card-title">
+        <h2>Snare Drum Taps (drum_taps) <span style="font-size: 0.9rem; font-weight: normal; color: #38bdf8; margin-left: 0.5rem;">[LTX-2.5]</span></h2>
+        <span class="badge-category">Music</span>
+      </div>
+      <div class="video-grid">
+        <div class="video-panel">
+          <h3><span>Original Audio</span><span style="color: #fbbf24;">Moderate (-25.8 dB)</span></h3>
+          <video src="/static/stimuli_old_unnormalized/drum_taps__music__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-25.8 dB</strong></span>
+            <span>Peak: <strong>-3.6 dB</strong></span>
+          </div>
+        </div>
+        <div class="video-panel">
+          <h3><span>Normalized Audio (EBU R128)</span><span style="color: #34d399;">Balanced (-21.8 dB)</span></h3>
+          <video src="/static/stimuli/drum_taps__music__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-21.8 dB</strong></span>
+            <span>Peak: <strong>-0.9 dB</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clip 6: guitar_strums -->
+    <div class="clip-comparison-card">
+      <div class="card-title">
+        <h2>Acoustic Guitar (guitar_strums) <span style="font-size: 0.9rem; font-weight: normal; color: #38bdf8; margin-left: 0.5rem;">[LTX-2.5]</span></h2>
+        <span class="badge-category">Music</span>
+      </div>
+      <div class="video-grid">
+        <div class="video-panel">
+          <h3><span>Original Audio</span><span style="color: #fbbf24;">Moderate (-23.9 dB)</span></h3>
+          <video src="/static/stimuli_old_unnormalized/guitar_strums__music__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-23.9 dB</strong></span>
+            <span>Peak: <strong>-4.3 dB</strong></span>
+          </div>
+        </div>
+        <div class="video-panel">
+          <h3><span>Normalized Audio (EBU R128)</span><span style="color: #34d399;">Balanced (-23.1 dB)</span></h3>
+          <video src="/static/stimuli/guitar_strums__music__0.mp4" controls preload="metadata"></video>
+          <div class="metric-row">
+            <span>Mean: <strong>-23.1 dB</strong></span>
+            <span>Peak: <strong>-3.8 dB</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

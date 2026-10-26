@@ -1,0 +1,50 @@
+# Python virtual environments & bytecode
+.venv/
+env/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Response Data (Database & CSV logs)
+# Keep data directory structure intact with .gitkeep but never commit participant responses
+data/*.sqlite3
+data/*.sqlite3-journal
+data/*.sqlite3-wal
+data/*.sqlite3-shm
+data/*.db
+data/*.csv
+!data/.gitkeep
+
+# Stimuli backups & local archives (keeps git repository lean & under size limits)
+static/stimuli_old_unnormalized/
+static/old_vids/
+static/stimuli_normalized/
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
