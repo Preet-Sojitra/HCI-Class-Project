@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin & Response Data Console | AV Synchrony Study</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    body {
+      overflow-y: auto !important;
+      height: auto !important;
+      min-height: 100vh;
+      padding: 1.5rem 1rem 3rem;
+    }
+    .admin-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .admin-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .admin-header h1 {
+      margin: 0;
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .admin-header p {
+      margin: 0.25rem 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .db-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .db-badge.pg {
+      background: #e6f7ef;
+      color: #1e6d4c;
+      border: 1px solid #b8ebcf;
+    }
+    .db-badge.sqlite {
+      background: #fef8e7;
+      color: #8c6314;
+      border: 1px solid #fae6b4;
+    }
+    .db-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .stat-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent-dark);
+      line-height: 1.1;
+    }
+    .stat-label {
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .btn-download {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      color: var(--ink);
+      transition: all 0.15s ease-in-out;
+    }
+    .btn-download:hover {
+      background: var(--accent-soft);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(40, 93, 109, 0.15);
+    }
+    .btn-download.primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-download.primary:hover {
+      background: var(--accent-dark);
+    }
+    .btn-download-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-download-desc {
+      font-size: 0.85rem;
+      margin-top: 0.35rem;
+      opacity: 0.85;
+    }
+    .table-responsive {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    table.data-table th,
+    table.data-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    table.data-table th {
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+    table.data-table tr:hover td {
+      background: rgba(40, 93, 109, 0.03);
+    }
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+    .nav-back:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <a href="/" class="nav-back">← Back to Study</a>
+
+    <div class="admin-card">
+      <div class="admin-header">
+        <div>
+          <h1>Researcher Data Console</h1>
+          <p>Real-time status and response downloads for the AV Synchrony Experiment</p>
+        </div>
+        <div>
+          {% if db_type == "postgres" %}
+          <div class="db-badge pg">
+            <span class="db-dot"></span> Render PostgreSQL (Persistent Cloud DB)
+          </div>
+          {% else %}
+          <div class="db-badge sqlite">
+            <span class="db-dot"></span> SQLite (Local File Fallback)
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-number">{{ total_responses }}</div>
+          <div class="stat-label">Total Trial Responses</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">{{ unique_participants }}</div>
+          <div class="stat-label">Distinct Participants</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">{{ debrief_count }}</div>
+          <div class="stat-label">Debrief Feedback Entries</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">{{ ping_count }}</div>
+          <div class="stat-label">Heartbeat Pings</div>
+        </div>
+      </div>
+
+      <h2 style="font-size: 1.15rem; margin-bottom: 0.75rem; color: var(--ink);">Download Export Files</h2>
+      <div class="actions-grid">
+        <a href="/admin/download" class="btn-download primary">
+          <span class="btn-download-title">📊 Download Responses CSV</span>
+          <span class="btn-download-desc">Export all participant trial responses, RTs, and naturalness ratings.</span>
+        </a>
+        <a href="/admin/download-debrief" class="btn-download">
+          <span class="btn-download-title">💬 Download Debrief CSV</span>
+          <span class="btn-download-desc">Export post-study qualitative participant feedback.</span>
+        </a>
+        {% if db_type == "sqlite" or sqlite_exists %}
+        <a href="/admin/download-db" class="btn-download">
+          <span class="btn-download-title">🗄️ Download SQLite File</span>
+          <span class="btn-download-desc">Raw local responses.sqlite3 database file.</span>
+        </a>
+        {% endif %}
+      </div>
+
+      <h2 style="font-size: 1.15rem; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--ink);">
+        Recent Trial Responses
+        <span style="font-weight: normal; font-size: 0.85rem; color: var(--muted); margin-left: 0.5rem;">(Showing latest 15 rows)</span>
+      </h2>
+      {% if recent_rows and recent_rows|length > 0 %}
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp (UTC)</th>
+              <th>Participant</th>
+              <th>Trial</th>
+              <th>Base Clip</th>
+              <th>Category</th>
+              <th>Offset (ms)</th>
+              <th>Sync</th>
+              <th>Naturalness</th>
+              <th>Practice?</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in recent_rows %}
+            <tr>
+              <td style="font-size: 0.82rem; color: var(--muted);">{{ r[0]|truncate(19, true, '') }}</td>
+              <td><strong>{{ r[1] }}</strong></td>
+              <td>{{ r[3] }}</td>
+              <td><code>{{ r[4] }}</code></td>
+              <td>{{ r[5] }}</td>
+              <td>{{ r[6] }} ms</td>
+              <td>
+                {% if r[7] == 'yes' %}
+                <span style="color: var(--success); font-weight: 700;">YES</span>
+                {% elif r[7] == 'no' %}
+                <span style="color: var(--danger); font-weight: 700;">NO</span>
+                {% else %}
+                —
+                {% endif %}
+              </td>
+              <td>{{ r[8] if r[8] else '—' }} / 7</td>
+              <td>{{ 'Practice' if r[15] == 1 else 'Main' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="padding: 2rem; text-align: center; background: var(--surface-soft); border-radius: var(--radius-md); border: 1px dashed var(--line-strong); color: var(--muted);">
+        No participant responses logged in database yet. Once participants take the study, responses will appear here in real-time.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
