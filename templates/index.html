@@ -57,9 +57,21 @@
             </ol>
 
             <div class="form-row">
-              <label for="participantId">Participant ID</label>
-              <input id="participantId" type="text" placeholder="For example, P012" maxlength="40" autocomplete="off" />
-              <span class="hint">Enter the anonymous ID given to you.</span>
+              <div class="label-row">
+                <label for="participantId">Participant ID</label>
+                <button type="button" id="randomizeIdBtn" class="btn-text-action" title="Generate another random ID">
+                  <span aria-hidden="true">↺</span> New random ID
+                </button>
+              </div>
+              <input id="participantId" type="text" placeholder="e.g., P-48291" maxlength="40" autocomplete="off" />
+              <div id="idNotice" class="id-notice">
+                <span class="id-notice-icon" aria-hidden="true">📝</span>
+                <div class="id-notice-content">
+                  <span id="idNoticeText">
+                    <strong>Please note this ID down:</strong> A random ID has been assigned. You can keep it or clear and enter your assigned ID. Save this ID to restart or resume if your study is interrupted.
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div id="resumeBanner" class="resume-banner hidden">
@@ -178,6 +190,7 @@
         </div>
         {% else %}
         <div class="completion-stats">
+          <div><strong id="completedParticipantId">—</strong><span>participant ID</span></div>
           <div><strong id="completedTrials">0</strong><span>trials completed</span></div>
           <div><strong id="sessionCode">—</strong><span>session code</span></div>
         </div>

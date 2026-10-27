@@ -21,6 +21,22 @@ const state = {
 };
 
 const SESSION_STORAGE_PREFIX = "av_study_session_";
+const LAST_PARTICIPANT_KEY = "av_study_last_pid";
+
+function generateRandomParticipantId() {
+  const num = Math.floor(10000 + Math.random() * 90000);
+  return `P-${num}`;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[m]));
+}
 
 function getSavedSession(participantId) {
   if (!participantId) return null;
@@ -276,8 +292,13 @@ async function finishTrial() {
 
   if (state.completedMain >= state.queue.length) {
     clearPersistedSession(state.participantId);
+    try {
+      localStorage.removeItem(LAST_PARTICIPANT_KEY);
+    } catch {}
     $("progressBar").style.width = "100%";
     setTimeout(() => $("progressWrap").classList.add("hidden"), 450);
+    const completedPid = $("completedParticipantId");
+    if (completedPid) completedPid.textContent = state.participantId;
     $("completedTrials").textContent = state.completedMain;
     $("sessionCode").textContent = state.sessionId.slice(0, 8).toUpperCase();
     showScreen("complete");
@@ -294,6 +315,7 @@ async function finishTrial() {
 
 function attachEvents() {
   const participantId = $("participantId");
+  const randomizeIdBtn = $("randomizeIdBtn");
   const consentCheck = $("consentCheck");
   const startBtn = $("startBtn");
   const discardSessionBtn = $("discardSessionBtn");
@@ -303,13 +325,24 @@ function attachEvents() {
     const consentChecked = consentCheck.checked;
     const resumeBanner = $("resumeBanner");
     const resumeDesc = $("resumeDesc");
+    const idNotice = $("idNotice");
+    const idNoticeText = $("idNoticeText");
 
     if (id.length < 2) {
       if (resumeBanner) resumeBanner.classList.add("hidden");
       startBtn.textContent = "Continue";
       startBtn.disabled = true;
       state.resuming = false;
+      if (idNotice) {
+        idNotice.classList.add("warn");
+        idNoticeText.innerHTML = `<strong>Participant ID required:</strong> Please enter your ID or click <em>New random ID</em> above to continue.`;
+      }
       return;
+    }
+
+    if (idNotice) {
+      idNotice.classList.remove("warn");
+      idNoticeText.innerHTML = `<strong>Please note this ID (<code>${escapeHtml(id)}</code>):</strong> Save or write this ID down. If your session is interrupted or stopped in between, you can return and re-enter this ID to resume where you left off.`;
     }
 
     const saved = getSavedSession(id);
@@ -341,12 +374,24 @@ function attachEvents() {
   participantId.addEventListener("input", updateStartState);
   consentCheck.addEventListener("change", updateStartState);
 
+  if (randomizeIdBtn) {
+    randomizeIdBtn.addEventListener("click", () => {
+      participantId.value = generateRandomParticipantId();
+      updateStartState();
+      participantId.focus();
+    });
+  }
+
   if (discardSessionBtn) {
     discardSessionBtn.addEventListener("click", (e) => {
       e.preventDefault();
       const id = participantId.value.trim();
       if (confirm(`Reset and discard previous progress for "${id}"?`)) {
         clearPersistedSession(id);
+        try {
+          localStorage.removeItem(LAST_PARTICIPANT_KEY);
+        } catch {}
+        participantId.value = generateRandomParticipantId();
         updateStartState();
       }
     });
@@ -354,6 +399,9 @@ function attachEvents() {
 
   startBtn.addEventListener("click", () => {
     state.participantId = participantId.value.trim();
+    try {
+      localStorage.setItem(LAST_PARTICIPANT_KEY, state.participantId);
+    } catch {}
 
     if (state.resuming) {
       const saved = getSavedSession(state.participantId);
@@ -366,6 +414,8 @@ function attachEvents() {
         state.breakpoints = computeBreakpoints(state.queue.length);
 
         if (state.completedMain >= state.queue.length) {
+          const completedPid = $("completedParticipantId");
+          if (completedPid) completedPid.textContent = state.participantId;
           $("completedTrials").textContent = state.completedMain;
           $("sessionCode").textContent = state.sessionId.slice(0, 8).toUpperCase();
           showScreen("complete");
@@ -380,6 +430,22 @@ function attachEvents() {
     persistSession();
     showScreen("instructions");
   });
+
+  if (!state.testMode && !participantId.value) {
+    let initialId = "";
+    try {
+      const lastId = localStorage.getItem(LAST_PARTICIPANT_KEY);
+      if (lastId && getSavedSession(lastId)) {
+        initialId = lastId;
+      }
+    } catch {}
+
+    if (!initialId) {
+      initialId = generateRandomParticipantId();
+    }
+    participantId.value = initialId;
+  }
+  updateStartState();
 
   document.querySelectorAll("[data-back='welcome']").forEach(btn => {
     btn.addEventListener("click", () => showScreen("welcome"));
